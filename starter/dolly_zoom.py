@@ -1,18 +1,21 @@
+#!/usr/bin/env python3
 """
 Usage:
     python -m starter.dolly_zoom --num_frames 10
 """
-
 import argparse
+import math
 
 import imageio
 import numpy as np
 import pytorch3d
 import torch
-from PIL import Image, ImageDraw
+from PIL import Image
+from PIL import ImageDraw
 from tqdm.auto import tqdm
 
-from starter.utils import get_device, get_mesh_renderer
+from starter.utils import get_device
+from starter.utils import get_mesh_renderer
 
 
 def dolly_zoom(
@@ -32,10 +35,18 @@ def dolly_zoom(
 
     fovs = torch.linspace(5, 120, num_frames)
 
+    # Set baseline parameters.
+    baseline_fov = 60.0  # degrees (baseline field of view)
+    baseline_distance = 3.0  # units (baseline distance)
+
+    # Compute the constant such that:
+    #   baseline_distance * tan(baseline_fov/2) = constant
+    constant = baseline_distance * math.tan(math.radians(baseline_fov / 2))
+
     renders = []
     for fov in tqdm(fovs):
-        distance = 3  # TODO: change this.
-        T = [[0, 0, 3]]  # TODO: Change this.
+        distance = constant / math.tan(math.radians(fov.item() / 2))
+        T = [[0, 0, distance]]
         cameras = pytorch3d.renderer.FoVPerspectiveCameras(fov=fov, T=T, device=device)
         rend = renderer(mesh, cameras=cameras, lights=lights)
         rend = rend[0, ..., :3].cpu().numpy()  # (N, H, W, 3)
@@ -47,7 +58,7 @@ def dolly_zoom(
         draw = ImageDraw.Draw(image)
         draw.text((20, 20), f"fov: {fovs[i]:.2f}", fill=(255, 0, 0))
         images.append(np.array(image))
-    imageio.mimsave(output_file, images, duration=duration)
+    imageio.mimsave(output_file, images, duration=duration, loop=0)
 
 
 if __name__ == "__main__":

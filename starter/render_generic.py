@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Sample code to render various representations.
 
@@ -15,7 +16,9 @@ import numpy as np
 import pytorch3d
 import torch
 
-from starter.utils import get_device, get_mesh_renderer, get_points_renderer
+from starter.utils import get_device
+from starter.utils import get_mesh_renderer
+from starter.utils import get_points_renderer
 
 
 def load_rgbd_data(path="data/rgbd_data.pkl"):
@@ -70,7 +73,8 @@ def render_sphere(image_size=256, num_samples=200, device=None):
     color = (points - points.min()) / (points.max() - points.min())
 
     sphere_point_cloud = pytorch3d.structures.Pointclouds(
-        points=[points], features=[color],
+        points=[points],
+        features=[color],
     ).to(device)
 
     cameras = pytorch3d.renderer.FoVPerspectiveCameras(T=[[0, 0, 3]], device=device)
@@ -85,7 +89,7 @@ def render_sphere_mesh(image_size=256, voxel_size=64, device=None):
     min_value = -1.1
     max_value = 1.1
     X, Y, Z = torch.meshgrid([torch.linspace(min_value, max_value, voxel_size)] * 3)
-    voxels = X ** 2 + Y ** 2 + Z ** 2 - 1
+    voxels = X**2 + Y**2 + Z**2 - 1
     vertices, faces = mcubes.marching_cubes(mcubes.smooth(voxels), isovalue=0)
     vertices = torch.tensor(vertices).float()
     faces = torch.tensor(faces.astype(int))
@@ -98,7 +102,10 @@ def render_sphere_mesh(image_size=256, voxel_size=64, device=None):
     mesh = pytorch3d.structures.Meshes([vertices], [faces], textures=textures).to(
         device
     )
-    lights = pytorch3d.renderer.PointLights(location=[[0, 0.0, -4.0]], device=device,)
+    lights = pytorch3d.renderer.PointLights(
+        location=[[0, 0.0, -4.0]],
+        device=device,
+    )
     renderer = get_mesh_renderer(image_size=image_size, device=device)
     R, T = pytorch3d.renderer.look_at_view_transform(dist=3, elev=0, azim=180)
     cameras = pytorch3d.renderer.FoVPerspectiveCameras(R=R, T=T, device=device)
@@ -127,4 +134,3 @@ if __name__ == "__main__":
     else:
         raise Exception("Did not understand {}".format(args.render))
     plt.imsave(args.output_path, image)
-

@@ -13,11 +13,11 @@ You will also need to install Pytorch. If you do not have a GPU, you can directl
 install it (`pip install torch`). Otherwise, follow the installation directions
 [here](https://pytorch.org/get-started/locally/).
 
-Other miscellaneous packages that you will need can be installed using the 
+Other miscellaneous packages that you will need can be installed using the
 `requirements.txt` file (`pip install -r requirements.txt`).
 
 If you have access to a GPU, the rendering code may run faster, but everything should
-be able to run locally on a CPU. Below are some sample installation instructions for a Linux Machine. 
+be able to run locally on a CPU. Below are some sample installation instructions for a Linux Machine.
 
 For GPU installation, we recommend CUDA>=11.6.
 
@@ -41,7 +41,7 @@ pip install -r requirements.txt
 
 ```
 
-Make sure that you have gcc $\ge$ 4.9.
+Make sure that you have gcc $\\ge$ 4.9.
 
 ### 0.1 Rendering your first mesh
 
@@ -49,6 +49,7 @@ To render a mesh using Pytorch3D, you will need a mesh that defines the geometry
 texture of an object, a camera that defines the viewpoint, and a Pytorch3D renderer
 that encapsulates rasterization and shading parameters. You can abstract away the
 renderer using the `get_mesh_renderer` wrapper function in `utils.py`:
+
 ```python
 renderer = get_mesh_renderer(image_size=512)
 ```
@@ -56,6 +57,7 @@ renderer = get_mesh_renderer(image_size=512)
 Meshes in Pytorch3D are defined by a list of vertices, faces, and texture information.
 We will be using per-vertex texture features that assign an RGB color to each vertex.
 You can construct a mesh using the `pytorch3d.structures.Meshes` class:
+
 ```python
 vertices = ...  # 1 x N_v x 3 tensor.
 faces = ...  # 1 x N_f x 3 tensor.
@@ -66,6 +68,7 @@ meshes = pytorch3d.structures.Meshes(
     textures=pytorch3d.renderer.TexturesVertex(textures),
 )
 ```
+
 Note that Pytorch3D assumes that meshes are *batched*, so the first dimension of all
 parameters should be 1. You can easily do this by calling `tensor.unsqueeze(0)` to add
 a batch dimension.
@@ -73,6 +76,7 @@ a batch dimension.
 Cameras can be constructed using a rotation, translation, and field-of-view
 (in degrees). A camera with identity rotation placed 3 units from the origin can be
 constructed as follows:
+
 ```python
 cameras = pytorch3d.renderer.FoVPerspectiveCameras(
     R=torch.eye(3).unsqueeze(0),
@@ -80,17 +84,20 @@ cameras = pytorch3d.renderer.FoVPerspectiveCameras(
     fov=60,
 )
 ```
+
 Again, the rotation and translations must be batched. **You should familiarize yourself
 with the [camera coordinate system](https://pytorch3d.org/docs/cameras) that Pytorch3D
 uses. This will save you a lot of headaches down the line.**
 
 Finally, to render the mesh, call the `renderer` on the mesh, camera, and lighting
 (optional). Our light will be placed in front of the cow at (0, 0, -3).
+
 ```python
 lights = pytorch3d.renderer.PointLights(location=[[0, 0, -3]])
 rend = renderer(mesh, cameras=cameras, lights=lights)
 image = rend[0, ..., :3].numpy()
 ```
+
 The output from the renderer is B x H x W x 4. Since our batch is one, we can just take
 the first element of the batch to get an image of H x W x 4. The fourth channel contains
 silhouette information that we will ignore, so we will only keep the 3 RGB channels.
@@ -109,23 +116,23 @@ the following output:
 Your first task is to create a 360-degree gif video that shows many continuous views of the
 provided cow mesh. For many of your results this semester, you will be expected to show
 full turntable views of your outputs. You may find the following helpful:
-* [`pytorch3d.renderer.look_at_view_transform`](https://pytorch3d.readthedocs.io/en/latest/modules/renderer/cameras.html#pytorch3d.renderer.cameras.look_at_view_transform):
-Given a distance, elevation, and azimuth, this function returns the corresponding
-set of rotations and translations to align the world to view coordinate system.
-* Rendering a gif given a set of images:
+
+- [`pytorch3d.renderer.look_at_view_transform`](https://pytorch3d.readthedocs.io/en/latest/modules/renderer/cameras.html#pytorch3d.renderer.cameras.look_at_view_transform):
+  Given a distance, elevation, and azimuth, this function returns the corresponding
+  set of rotations and translations to align the world to view coordinate system.
+- Rendering a gif given a set of images:
+
 ```python
 import imageio
 my_images = ...  # List of images [(H, W, 3)]
 duration = 1000 // 15  # Convert FPS (frames per second) to duration (ms per frame)
 imageio.mimsave('my_gif.gif', my_images, duration=duration)
 ```
+
 You can pass an additional argument `loop=0` to `imageio.mimsave` to make the gif loop.
 
-
 > <g>**Submission**</g>: On your webpage, you should include a gif that shows the cow mesh from many
-continuously changing viewpoints.
-
-
+> continuously changing viewpoints.
 
 ### 1.2 Re-creating the Dolly Zoom (10 points)
 
@@ -151,20 +158,20 @@ calling `python -m starter.dolly_zoom`.
 ### 2.1 Constructing a Tetrahedron (5 points)
 
 In this part, you will practice working with the geometry of 3D meshes.
-Construct a tetrahedron mesh and then render it from multiple viewpoints. 
+Construct a tetrahedron mesh and then render it from multiple viewpoints.
 Your tetrahedron does not need to be a regular
 tetrahedron (i.e. not all faces need to be equilateral triangles) as long as it is
 obvious from the renderings that the shape is a tetrahedron.
 
 You will need to manually define the vertices and faces of the mesh. Once you have the
 vertices and faces, you can define a single-color texture, similarly to the cow in
-`render_mesh.py`. Remember that the faces are the vertex indices of the triangle mesh. 
+`render_mesh.py`. Remember that the faces are the vertex indices of the triangle mesh.
 
 It may help to draw a picture of your tetrahedron and label the vertices and assign 3D
 coordinates.
 
 > <g>**Submission**</g>: On your webpage, show a 360-degree gif animation of your tetrahedron.
-Also, list how many vertices and (triangle) faces your mesh should have.
+> Also, list how many vertices and (triangle) faces your mesh should have.
 
 ### 2.2 Constructing a Cube (5 points)
 
@@ -173,8 +180,7 @@ still working with triangle meshes, so you will need to use two sets of triangle
 to represent one face of the cube.
 
 > <g>**Submission**</g>: On your webpage, show a 360-degree gif animation of your cube.
-Also, list how many vertices and (triangle) faces your mesh should have.
-
+> Also, list how many vertices and (triangle) faces your mesh should have.
 
 ## 3. Re-texturing a mesh (10 points)
 
@@ -188,6 +194,7 @@ The front of the cow corresponds to the vertex with the smallest z-coordinate `z
 and the back of the cow corresponds to the vertex with the largest z-coordinate `z_max`.
 Then, we will assign the color of each vertex using linear interpolation based on the
 z-value of the vertex:
+
 ```python
 alpha = (z - z_min) / (z_max - z_min)
 color = alpha * color2 + (1 - alpha) * color1
@@ -211,12 +218,10 @@ the camera extrinsics rotation `R_0` and translation `T_0`:
 
 ![Cow render](images/transform_none.jpg)
 
-
 What are the relative camera transformations that would produce each of the following
 output images? You should find a set (R_relative, T_relative) such that the new camera
 extrinsics with `R = R_relative @ R_0` and `T = R_relative @ T_0 + T_relative` produces
 each of the following images:
-
 
 ![Cow render](images/transform1.jpg)
 ![Cow render](images/transform3.jpg)
@@ -225,8 +230,6 @@ each of the following images:
 
 > <g>**Submission**</g>: In your report, describe in words what R_relative and T_relative should be doing and include the rendering produced by your choice of R_relative and T_relative.
 
-
-
 ## 5. Rendering Generic 3D Representations
 
 The simplest possible 3D representation is simply a collection of 3D points, each
@@ -234,10 +237,11 @@ possibly associated with a color feature. PyTorch3D provides functionality for r
 point clouds.
 
 Similar to the mesh rendering, we will need a `PointCloud` object consisting of 3D
-points and colors, a camera from which to view the point cloud, and a Pytorch3D Point 
+points and colors, a camera from which to view the point cloud, and a Pytorch3D Point
 Renderer which we have wrapped similarly to the Mesh Renderer.
 
 To construct a point cloud, use the `PointCloud` class:
+
 ```python
 points = ...  # 1 x N x 3
 rgb = ...  # 1 x N x 3
@@ -245,11 +249,13 @@ point_cloud = pytorch3d.structures.PointCloud(
     points=points, features=rgb
 )
 ```
+
 As with all the mesh rendering, everything should be batched.
 
 The point renderer takes in a point cloud and a camera and returns a B x H x W x 4
 rendering, similar to the mesh renderer.
-```
+
+```Shell
 from starter.utils import get_points_renderer
 points_renderer = get_points_renderer(
     image_size=256,
@@ -265,9 +271,7 @@ To see a full working example of rendering a point cloud, see `render_bridge` in
 If you run `python -m starter.render_generic --render point_cloud`, you should
 get the following output:
 
-
 ![bridge](images/bridge.jpg)
-
 
 ### 5.1 Rendering Point Clouds from RGB-D Images (10 points)
 
@@ -283,14 +287,15 @@ Pytorch3D camera corresponding to the pose that the image was taken from.
 You should use the `unproject_depth_image` function in `utils.py` to convert a depth
 image into a point cloud (parameterized as a set of 3D coordinates and corresponding
 color values). The `unproject_depth_image` function uses the camera
-intrinsics and extrinisics to cast a ray from every pixel in the image into world 
+intrinsics and extrinisics to cast a ray from every pixel in the image into world
 coordinates space. The ray's final distance is the depth value at that pixel, and the
 color of each point can be determined from the corresponding image pixel.
 
 Construct 3 different point clouds:
+
 1. The point cloud corresponding to the first image
-2. The point cloud corresponding to the second image
-3. The point cloud formed by the union of the first 2 point clouds.
+1. The point cloud corresponding to the second image
+1. The point cloud formed by the union of the first 2 point clouds.
 
 Try visualizing each of the point clouds from various camera viewpoints. We suggest
 starting with cameras initialized 6 units from the origin with equally spaced azimuth
@@ -308,7 +313,7 @@ surface of a unit sphere as
 By sampling values of `theta` and `phi`, we can generate a sphere point cloud.
 You can render a sphere point cloud by calling `python -m starter.render_generic --render parametric`.
 Note that the amount of samples can have an effect on the appearance quality. Below, we show the
-output with a 100x100 grid of (phi, theta) pairs (`--num_samples 100`) as well as a 
+output with a 100x100 grid of (phi, theta) pairs (`--num_samples 100`) as well as a
 1000x1000 grid (`--num_samples 1000`). The latter may take a long time to run on CPU.
 
 ![Sphere 100](images/sphere_100.jpg)
@@ -318,10 +323,9 @@ Your task is to render a [torus](https://en.wikipedia.org/wiki/Torus) point clou
 sampling its parametric function.
 
 > <g>**Submission**</g>:
-> -  In your writeup, include a 360-degree gif of your torus point cloud, and make sure the hole is visible. You may choose to texture your point cloud however you wish. (10 points)
+>
+> - In your writeup, include a 360-degree gif of your torus point cloud, and make sure the hole is visible. You may choose to texture your point cloud however you wish. (10 points)
 > - Include a 360-degree gif on any new object of your choice. (5 points)
-
-
 
 ### 5.3 Implicit Surfaces (15 + 5 points)
 
@@ -337,7 +341,7 @@ the 0-level set.
 
 In practice, we can generate our voxel coordinates using `torch.meshgrid` which we will
 use to query our function (in this case mathematical ones).
-Once we have our voxel grid, we can use the 
+Once we have our voxel grid, we can use the
 [`mcubes`](https://github.com/pmneila/PyMCubes) library to convert it into a mesh.
 
 A sample sphere mesh can be constructed implicitly and rendered by calling
@@ -350,14 +354,15 @@ Your task is to render a torus again, this time as a mesh defined by an implicit
 function.
 
 > <g>**Submission**</g>:
-> -  In your writeup, include a 360-degree gif of your torus mesh, and make sure the hole
-is visible. (10 points)
+>
+> - In your writeup, include a 360-degree gif of your torus mesh, and make sure the hole
+>   is visible. (10 points)
 > - In addition, discuss some of the tradeoffs between rendering as a mesh
-vs a point cloud. Things to consider might include rendering speed, rendering quality,
-ease of use, memory usage, etc. (5 points)
+>   vs a point cloud. Things to consider might include rendering speed, rendering quality,
+>   ease of use, memory usage, etc. (5 points)
 > - Include a 360-degree gif on any new object of your choice. This object can be different from what you used in 5.2 (5 points)
 
-****
+______________________________________________________________________
 
 ## 6. Do Something Fun (10 points)
 
@@ -374,18 +379,16 @@ We will explore how to obtain point clouds from triangle meshes.
 One obvious way to do this is to simply discard the face information and treat the vertices as a point cloud.
 However, this might be unreasonable if the faces are not of equal size.
 
-
 Instead, as we saw in the lectures, a solution to this problem is to use a uniform sampling of the surface using
 stratified sampling. The procedure is as follows:
 
 1. Sample a face with probability proportional to the area of the face
-2. Sample a random [barycentric coordinate](https://en.wikipedia.org/wiki/Barycentric_coordinate_system) uniformly
-3. Compute the corresponding point using baricentric coordinates on the selected face.
-
+1. Sample a random [barycentric coordinate](https://en.wikipedia.org/wiki/Barycentric_coordinate_system) uniformly
+1. Compute the corresponding point using baricentric coordinates on the selected face.
 
 For this part, write a function that takes a triangle mesh and the number of samples
 and outputs a point cloud. Then, using the cow mesh, randomly sample 10, 100, 1000, and
-10000 points. 
+10000 points.
 
 > <g>**Submission**</g>: Render each pointcloud and the original cow mesh side-by-side, and
-include the gif in your writeup.
+> include the gif in your writeup.

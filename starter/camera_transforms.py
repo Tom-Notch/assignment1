@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Usage:
     python -m starter.camera_transforms --image_size 512
@@ -8,7 +9,8 @@ import matplotlib.pyplot as plt
 import pytorch3d
 import torch
 
-from starter.utils import get_device, get_mesh_renderer
+from starter.utils import get_device
+from starter.utils import get_mesh_renderer
 
 
 def render_textured_cow(
@@ -27,9 +29,14 @@ def render_textured_cow(
     T = R_relative @ torch.tensor([0.0, 0, 3]) + T_relative
     renderer = get_mesh_renderer(image_size=256)
     cameras = pytorch3d.renderer.FoVPerspectiveCameras(
-        R=R.unsqueeze(0), T=T.unsqueeze(0), device=device,
+        R=R.unsqueeze(0),
+        T=T.unsqueeze(0),
+        device=device,
     )
-    lights = pytorch3d.renderer.PointLights(location=[[0, 0.0, -3.0]], device=device,)
+    lights = pytorch3d.renderer.PointLights(
+        location=[[0, 0.0, -3.0]],
+        device=device,
+    )
     rend = renderer(meshes, cameras=cameras, lights=lights)
     return rend[0, ..., :3].cpu().numpy()
 

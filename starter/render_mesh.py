@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Sample code to render a cow.
 
@@ -10,11 +11,16 @@ import matplotlib.pyplot as plt
 import pytorch3d
 import torch
 
-from starter.utils import get_device, get_mesh_renderer, load_cow_mesh
+from starter.utils import get_device
+from starter.utils import get_mesh_renderer
+from starter.utils import load_cow_mesh
 
 
 def render_cow(
-    cow_path="data/cow.obj", image_size=256, color=[0.7, 0.7, 1], device=None,
+    cow_path="data/cow.obj",
+    image_size=256,
+    color=[0.7, 0.7, 1],
+    device=None,
 ):
     # The device tells us whether we are rendering with GPU or CPU. The rendering will
     # be *much* faster if you have a CUDA-enabled NVIDIA GPU. However, your code will
